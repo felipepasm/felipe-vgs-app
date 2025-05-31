@@ -19,12 +19,12 @@ investment_amount = st.sidebar.number_input("Investment per Trigger (AUD)", 500,
 
 @st.cache_data
 def load_data():
-    data = yf.download(ticker, start=start_date, end=end_date)
-    data['20d_SMA'] = data['Close'].rolling(window=sma_window).mean()
-    data['% Below SMA'] = ((data['Close'] - data['20d_SMA']) / data['20d_SMA']) * 100
-    return data.dropna()
+    return yf.download(ticker, start=start_date, end=end_date)
 
 data = load_data()
+data['SMA'] = data['Close'].rolling(window=sma_window).mean()
+data = data.dropna()
+data['% Below SMA'] = ((data['Close'] - data['SMA']) / data['SMA']) * 100
 
 # Generate 3-week downtrend
 weekly = data['Close'].resample('W-FRI').last()
@@ -61,6 +61,7 @@ st.metric("Total Invested (AUD)", f"${total_invested:,.2f}")
 st.metric("Current Value (AUD)", f"${current_value:,.2f}")
 st.metric("Total Gain (AUD)", f"${gain:,.2f}", delta=f"{(gain/total_invested)*100:.2f}%")
 
-st.dataframe(data[['Close', '20d_SMA', '% Below SMA', '3-Week Downtrend', 'BUY Flag']].tail(90))
+st.dataframe(data[['Close', 'SMA', '% Below SMA', '3-Week Downtrend', 'BUY Flag']].tail(90))
 
-st.line_chart(data[['Close', '20d_SMA']])
+st.line_chart(data[['Close', 'SMA']])
+
