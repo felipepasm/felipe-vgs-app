@@ -23,7 +23,7 @@ def load_data():
 
 data = load_data()
 data['SMA'] = data['Close'].rolling(window=sma_window).mean()
-data = data[data['SMA'].notna()].copy()
+data = data.dropna(subset=['SMA']).copy()
 data['% Below SMA'] = ((data['Close'] - data['SMA']) / data['SMA']) * 100
 
 # Generate 3-week downtrend
