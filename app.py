@@ -22,9 +22,16 @@ def load_data():
     return yf.download(ticker, start=start_date, end=end_date)
 
 data = load_data()
-data['SMA'] = data['Close'].rolling(window=sma_window).mean()
-data = data.dropna(subset=['SMA']).copy()
-data['% Below SMA'] = ((data['Close'] - data['SMA']) / data['SMA']) * 100
+
+if data.empty:
+    st.error("No data available for VGS. Please try again later.")
+    st.stop()
+
+# Calculate SMA and drop rows with NaN SMA
+sma_column = 'SMA'
+data[sma_column] = data['Close'].rolling(window=sma_window).mean()
+data = data.dropna(subset=[sma_column]).copy()
+data['% Below SMA'] = ((data['Close'] - data[sma_column]) / data[sma_column]) * 100
 
 # Generate 3-week downtrend
 weekly = data['Close'].resample('W-FRI').last()
@@ -61,6 +68,6 @@ st.metric("Total Invested (AUD)", f"${total_invested:,.2f}")
 st.metric("Current Value (AUD)", f"${current_value:,.2f}")
 st.metric("Total Gain (AUD)", f"${gain:,.2f}", delta=f"{(gain/total_invested)*100:.2f}%")
 
-st.dataframe(data[['Close', 'SMA', '% Below SMA', '3-Week Downtrend', 'BUY Flag']].tail(90))
+st.dataframe(data[['Close', sma_column, '% Below SMA', '3-Week Downtrend', 'BUY Flag']].tail(90))
 
-st.line_chart(data[['Close', 'SMA']])
+st.line_chart(data[['Close', sma_column]])
