@@ -23,7 +23,7 @@ def load_data():
 
 data = load_data()
 data['SMA'] = data['Close'].rolling(window=sma_window).mean()
-data = data.dropna()
+data = data[data['SMA'].notna()].copy()
 data['% Below SMA'] = ((data['Close'] - data['SMA']) / data['SMA']) * 100
 
 # Generate 3-week downtrend
@@ -64,4 +64,3 @@ st.metric("Total Gain (AUD)", f"${gain:,.2f}", delta=f"{(gain/total_invested)*10
 st.dataframe(data[['Close', 'SMA', '% Below SMA', '3-Week Downtrend', 'BUY Flag']].tail(90))
 
 st.line_chart(data[['Close', 'SMA']])
-
