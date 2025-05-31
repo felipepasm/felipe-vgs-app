@@ -23,14 +23,19 @@ def load_data():
 
 data = load_data()
 
-if data.empty:
-    st.error("No data available for VGS. Please try again later.")
+if data.empty or 'Close' not in data.columns:
+    st.error("No valid price data available for VGS. Please try again later.")
     st.stop()
 
 # Calculate SMA and drop rows with NaN SMA
 sma_column = 'SMA'
 data[sma_column] = data['Close'].rolling(window=sma_window).mean()
-data = data.dropna(subset=[sma_column]).copy()
+if sma_column in data.columns:
+    data = data.dropna(subset=[sma_column]).copy()
+else:
+    st.error("SMA column not found in the dataset.")
+    st.stop()
+
 data['% Below SMA'] = ((data['Close'] - data[sma_column]) / data[sma_column]) * 100
 
 # Generate 3-week downtrend
