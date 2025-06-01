@@ -97,5 +97,23 @@ st.metric("Total Gain (AUD)", f"${gain:,.2f}", delta=f"{(gain/total_invested)*10
 
 st.dataframe(data[['Close', sma_column, '% Below SMA', '3-Week Downtrend', 'BUY Flag']].tail(90))
 
-st.line_chart(data[['Close', sma_column]])
+import plotly.graph_objects as go
 
+# Plot with BUY markers and adjustable Y-axis
+fig = go.Figure()
+fig.add_trace(go.Scatter(x=data.index, y=data['Close'], mode='lines', name='Close'))
+fig.add_trace(go.Scatter(x=data.index, y=data[sma_column], mode='lines', name=f'{sma_window}-day SMA'))
+
+# Add BUY markers
+buy_dates = data[data['BUY'] == 1].index
+buy_prices = data.loc[buy_dates, 'Close']
+fig.add_trace(go.Scatter(x=buy_dates, y=buy_prices, mode='markers', name='BUY Signal', marker=dict(color='green', size=10, symbol='triangle-up')))
+
+# Let user set Y-axis bounds
+st.sidebar.subheader("Chart Y-Axis Range")
+y_min = st.sidebar.number_input("Min Y", value=float(data['Close'].min()) * 0.95)
+y_max = st.sidebar.number_input("Max Y", value=float(data['Close'].max()) * 1.05)
+fig.update_layout(title="VGS Close Price & SMA with BUY Signals",
+                  yaxis=dict(title='Price (AUD)', range=[y_min, y_max]),
+                  xaxis_title='Date')
+st.plotly_chart(fig, use_container_width=True)
