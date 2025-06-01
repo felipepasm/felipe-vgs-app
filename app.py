@@ -35,7 +35,11 @@ data[sma_column] = data['Close'].rolling(window=sma_window).mean()
 # Drop rows with missing Close or SMA values
 required_columns = ['Close', sma_column]
 if all(col in data.columns for col in required_columns):
+    try:
     data = data.dropna(subset=required_columns).copy()
+except KeyError:
+    st.error("One or more required columns were not found in the dataset. This may be a temporary issue with the data source.")
+    st.stop()
 else:
     st.error("Required columns missing from the dataset. Try again later.")
     st.stop()
@@ -81,3 +85,4 @@ st.metric("Total Gain (AUD)", f"${gain:,.2f}", delta=f"{(gain/total_invested)*10
 st.dataframe(data[['Close', sma_column, '% Below SMA', '3-Week Downtrend', 'BUY Flag']].tail(90))
 
 st.line_chart(data[['Close', sma_column]])
+
