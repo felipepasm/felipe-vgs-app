@@ -23,6 +23,10 @@ def load_data():
 
 data = load_data()
 
+# Flatten multi-indexed columns if needed
+if isinstance(data.columns, pd.MultiIndex):
+    data.columns = data.columns.get_level_values(0)
+
 # Fallback to demo data if needed
 if data.empty or 'Close' not in data.columns:
     st.warning("Falling back to demo data.")
