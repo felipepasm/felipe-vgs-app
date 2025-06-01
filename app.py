@@ -23,20 +23,17 @@ def load_data():
 
 data = load_data()
 
+# Ensure necessary columns exist
 if data.empty or 'Close' not in data.columns:
     st.error("No valid price data available for VGS. Please try again later.")
     st.stop()
 
-# Calculate SMA
+# Calculate SMA and % deviation
 sma_column = 'SMA'
 data[sma_column] = data['Close'].rolling(window=sma_window).mean()
 
-# Drop rows where either 'Close' or 'SMA' is NaN
-if {'Close', sma_column}.issubset(data.columns):
-    data = data.dropna(subset=['Close', sma_column]).copy()
-else:
-    st.error("Required columns not found in the dataset.")
-    st.stop()
+# Drop rows with missing Close or SMA values
+data = data.dropna(subset=['Close', sma_column]).copy()
 
 # Calculate % Below SMA
 data['% Below SMA'] = ((data['Close'] - data[sma_column]) / data[sma_column]) * 100
