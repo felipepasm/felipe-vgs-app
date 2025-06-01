@@ -42,9 +42,7 @@ try:
 except KeyError:
     st.error("One or more required columns were not found in the dataset. This may be a temporary issue with the data source.")
     st.stop()
-else:
-    st.error("Required columns missing from the dataset. Try again later.")
-    st.stop()
+
 
 # Calculate % Below SMA
 data['% Below SMA'] = ((data['Close'] - data[sma_column]) / data[sma_column]) * 100
