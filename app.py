@@ -33,7 +33,12 @@ sma_column = 'SMA'
 data[sma_column] = data['Close'].rolling(window=sma_window).mean()
 
 # Drop rows with missing Close or SMA values
-data = data.dropna(subset=['Close', sma_column]).copy()
+required_columns = ['Close', sma_column]
+if all(col in data.columns for col in required_columns):
+    data = data.dropna(subset=required_columns).copy()
+else:
+    st.error("Required columns missing from the dataset. Try again later.")
+    st.stop()
 
 # Calculate % Below SMA
 data['% Below SMA'] = ((data['Close'] - data[sma_column]) / data[sma_column]) * 100
