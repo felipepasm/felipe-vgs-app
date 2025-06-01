@@ -34,9 +34,11 @@ data[sma_column] = data['Close'].rolling(window=sma_window).mean()
 
 # Drop rows with missing Close or SMA values
 required_columns = ['Close', sma_column]
-if all(col in data.columns for col in required_columns):
-    try:
+try:
+    if all(col in data.columns for col in required_columns):
         data = data.dropna(subset=required_columns).copy()
+    else:
+        raise KeyError("Required columns not found.")
 except KeyError:
     st.error("One or more required columns were not found in the dataset. This may be a temporary issue with the data source.")
     st.stop()
