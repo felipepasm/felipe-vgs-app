@@ -23,6 +23,15 @@ def load_data():
 
 data = load_data()
 
+# Fallback to demo data if needed
+if data.empty or 'Close' not in data.columns:
+    st.warning("Falling back to demo data.")
+    dates = pd.date_range(start=start_date, end=end_date)
+    np.random.seed(42)
+    prices = 100 + np.cumsum(np.random.randn(len(dates)))
+    data = pd.DataFrame({'Close': prices}, index=dates)
+st.write("Loaded columns:", data.columns.tolist())
+
 # Ensure necessary columns exist
 if data.empty or 'Close' not in data.columns:
     st.error("No valid price data available for VGS. Please try again later.")
@@ -85,3 +94,4 @@ st.metric("Total Gain (AUD)", f"${gain:,.2f}", delta=f"{(gain/total_invested)*10
 st.dataframe(data[['Close', sma_column, '% Below SMA', '3-Week Downtrend', 'BUY Flag']].tail(90))
 
 st.line_chart(data[['Close', sma_column]])
+
